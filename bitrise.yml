@@ -1,0 +1,77 @@
+format_version: 5
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - SAMPLE_APP_REPOSITORY_URL: https://github.com/bitrise-samples/sample-apps-android-abi-split.git
+  - GRADLE_TASK: assembleRelease
+  - GRADLEW_PATH: "./gradlew"
+
+workflows:
+  test:
+    before_run:
+    - audit-this-step
+    - go-tests
+    steps:
+    - script:
+        title: remove _tmp dir
+        inputs:
+        - content: rm -rf ./_tmp
+    - change-workdir:
+        title: cd to _tmp dir
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
+        title: Clone test project
+        inputs:
+        - clone_into_dir: $BITRISE_SOURCE_DIR
+        - repository_url: $SAMPLE_APP_REPOSITORY_URL
+        - branch: master
+    - path::./:
+        title: step test
+        inputs:
+        - build_gradle_path: "./app/build.gradle"
+        - new_application_id: "com.testcompany.testapp"
+    - script:
+        title: output test
+        is_always_run: true
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -x
+            if [[ "${ANDROID_APPLICATION_ID}" != 'com.testcompany.testapp' ]]; then
+                echo 'Invalid ANDROID_APPLICATION_ID, should be: com.testcompany.testapp'
+                exit 1
+            fi
+
+  go-tests:
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+
+  # ----------------------------------------------------------------
+  # --- Utility workflows
+  dep-update:
+    steps:
+    - script:
+        title: dep update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
+
+  # ----------------------------------------------------------------
+  # --- workflows to Share this step into a Step Library
+  audit-this-step:
+    steps:
+    - script:
+        title: audit step.yml
+        inputs:
+        - content: stepman audit --step-yml ./step.yml
