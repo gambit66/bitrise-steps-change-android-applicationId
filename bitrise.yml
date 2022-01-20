@@ -6,6 +6,10 @@ app:
   - SAMPLE_APP_REPOSITORY_URL: https://github.com/bitrise-samples/sample-apps-android-abi-split.git
   - GRADLE_TASK: assembleRelease
   - GRADLEW_PATH: "./gradlew"
+  - BITRISE_STEP_ID: change-android-applicationid
+  - BITRISE_STEP_VERSION: "1.0.0"
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/gambit66/bitrise-steps-change-android-applicationId.git
+  - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL  
 
 workflows:
   test:
