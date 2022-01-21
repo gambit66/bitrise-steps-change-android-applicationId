@@ -49,7 +49,7 @@ inputs:
       title: Path to the build.gradle file
       summary: Path to the build.gradle file shows the applicationId setting.
       is_required: true
-  - new_application_id: com.mycompany.myapp
+  - new_application_id:
     opts:
       title: New applicationId
       summary: |-
